@@ -41,8 +41,6 @@ class CompletedLine(
 ) : Line
 
 interface Frame {
-    val roll1: PinCount?
-    val roll2: PinCount?
     val score: Score?
         get() = TODO("Not yet implemented")}
 
@@ -54,27 +52,23 @@ interface PlayableFrame : Frame {
 interface CompletedFrame : Frame
 
 class UnplayedFrame : PlayableFrame {
-    override val roll1: PinCount? = null
-    override val roll2: PinCount? = null
     override fun roll(pinCount: PinCount) = when {
         pinCount.value == 10 -> Strike()
         else -> InProgressFrame(pinCount)
     }
 }
 
-class InProgressFrame(override val roll1: PinCount) : PlayableFrame {
-    override val roll2: PinCount? = null
+class InProgressFrame(val roll1: PinCount) : PlayableFrame {
     override fun roll(pinCount: PinCount) = NormalCompletedFrame(roll1, pinCount)
 }
 
 class Strike : CompletedFrame {
-    override val roll1: PinCount = PinCount(10)
-    override val roll2: PinCount? = null
+    val roll1: PinCount = PinCount(10)
 }
 
 class NormalCompletedFrame(
-    override val roll1: PinCount,
-    override val roll2: PinCount
+    val roll1: PinCount,
+    val roll2: PinCount
 ) : CompletedFrame
 
 

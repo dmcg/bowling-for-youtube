@@ -6,6 +6,7 @@ sealed interface Game {
         operator fun invoke(vararg playerNames: String, frameCount: Int = 10): Game =
             when {
                 playerNames.isEmpty() -> CompletedGame(emptyList())
+                frameCount == 0 -> CompletedGame(playerNames.map { CompletedLine(it, emptyList()) })
                 else -> PlayableGame(*playerNames, frameCount = frameCount)
             }
     }
@@ -13,14 +14,17 @@ sealed interface Game {
 
 data class PlayableGame(override val lines: List<Line>) : Game {
 
-    val currentPlayer: String get() = currentLine.playerName.value
+    val currentPlayer: String get() = currentLine.playerName
 
     constructor(vararg playerNames: String, frameCount: Int) : this(
-        playerNames.map {
-            PlayableLine(
-                PlayerName(it),
-                List(frameCount) { UnplayedFrame() }
-            )
+        Unit.run {
+            require(frameCount >= 1) { "Cannot construct a playable game with $frameCount frames"}
+            playerNames.map {
+                PlayableLine(
+                    it,
+                    List(frameCount) { UnplayedFrame() }
+                )
+            }
         }
     )
 
@@ -58,11 +62,11 @@ data class CompletedGame(
 ) : Game
 
 sealed interface Line {
-    val playerName: PlayerName
+    val playerName: String
     val frames: List<Frame>
 }
 class PlayableLine(
-    override val playerName: PlayerName,
+    override val playerName: String,
     override val frames: List<Frame>
 ) : Line {
     init {
@@ -82,20 +86,20 @@ class PlayableLine(
 }
 
 class CompletedLine(
-    override val playerName: PlayerName,
+    override val playerName: String,
     override val frames: List<CompletedFrame>
 ) : Line
 
-interface Frame {
+sealed interface Frame {
     val score: Score?
         get() = TODO("Not yet implemented")}
 
 
-interface PlayableFrame : Frame {
+sealed interface PlayableFrame : Frame {
     fun roll(pinCount: PinCount): Frame
 }
 
-interface CompletedFrame : Frame
+sealed interface CompletedFrame : Frame
 
 class UnplayedFrame : PlayableFrame {
     override fun roll(pinCount: PinCount) = when {
@@ -115,11 +119,9 @@ class Strike : CompletedFrame {
 class NormalCompletedFrame(
     val roll1: PinCount,
     val roll2: PinCount
-) : CompletedFrame
-
-
-@JvmInline
-value class PlayerName(val value: String)
+) : CompletedFrame {
+    val isSpare: Boolean get() = roll1.value + roll2.value == 10
+}
 
 @JvmInline
 value class Score(val value: Int) {
@@ -129,11 +131,19 @@ value class Score(val value: Int) {
 @JvmInline
 value class PinCount(val value: Int) {
     init { require(value in 0..10) }
+
+    override fun toString(): String = when (value) {
+        0 -> "-"
+        else -> value.toString()
+    }
 }
 
 private fun <E> List<E>.replacing(item: E, newItem: E): List<E> =
     map {if (it == item) newItem else it
 }
+
+@JvmInline
+value class PlayerName(val value: String)
 
 class Player
 class Foul

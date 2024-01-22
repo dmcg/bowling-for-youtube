@@ -12,8 +12,7 @@ sealed interface Game {
 }
 
 data class PlayableGame(override val lines: List<Line>) : Game {
-    private val currentLine: PlayableLine get() =
-        lines.singleOrNull() as? PlayableLine ?: TODO("handle more than one player")
+
     val currentPlayer: String get() = currentLine.playerName.value
 
     constructor(vararg playerNames: String, frameCount: Int) : this(
@@ -38,6 +37,20 @@ data class PlayableGame(override val lines: List<Line>) : Game {
             CompletedGame(completedLines)
         else
             PlayableGame(newLines)
+    }
+
+    private val currentLine: PlayableLine get() {
+        val indicesOfFirstPlayableFrame: List<Int> = lines.map { line ->
+            line.frames.indexOfFirst { it is PlayableFrame }
+        }
+        val indexOfFirstPlayableFrame = indicesOfFirstPlayableFrame.minBy {
+            if (it == -1) Int.MAX_VALUE else it
+        }
+        val indexOfFirstPlayableLine = indicesOfFirstPlayableFrame.indexOfFirst {
+            it == indexOfFirstPlayableFrame
+        }
+        return lines[indexOfFirstPlayableLine] as? PlayableLine
+            ?: error("programmer error")
     }
 }
 data class CompletedGame(

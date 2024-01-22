@@ -1,6 +1,5 @@
 package com.oneeyedmen.bowling
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
@@ -21,38 +20,47 @@ class BowlingTests {
         expectThat(Game("Fred", "Barney")).isA<PlayableGame>()
     }
 
-    @Disabled("WIP")
     @Test
     fun `play a game`() {
-        val game: Game = Game("Fred", "Barney")
-        assertTrue(game is PlayableGame)
+        var game: Game
+        game = Game("Fred", "Barney", frameCount = 2) as PlayableGame
         expectThat(game.currentPlayer).isEqualTo("Fred")
-//        val game2: Game = game.roll(PinCount(1))
-//        assertTrue(game2 is PlayableGame)
-//        val game3: Game = game.roll(PinCount(1))
+        game = game.roll(PinCount(1)) as PlayableGame
+        expectThat(game.currentPlayer).isEqualTo("Fred")
+        game = game.roll(PinCount(2)) as PlayableGame
+        expectThat(game.currentPlayer).isEqualTo("Barney")
+        game = game.roll(PinCount(3)) as PlayableGame
+        expectThat(game.currentPlayer).isEqualTo("Barney")
+        game = game.roll(PinCount(4)) as PlayableGame
+        expectThat(game.currentPlayer).isEqualTo("Fred")
+        game = game.roll(PinCount(5)) as PlayableGame
+        game = game.roll(PinCount(6)) as PlayableGame
+        expectThat(game.currentPlayer).isEqualTo("Barney")
+        game = game.roll(PinCount(7)) as PlayableGame
+        game = game.roll(PinCount(8))
+        assertTrue(game is CompletedGame)
     }
 
     @Test
     fun `play a game with just one player and one frame`() {
-        val game: Game = Game("Fred", frameCount = 1)
-        assertTrue(game is PlayableGame)
+        var game: Game
+        game = Game("Fred", frameCount = 1) as PlayableGame
         expectThat(game.currentPlayer).isEqualTo("Fred")
-        val game2: Game = game.roll(PinCount(1))
-        assertTrue(game2 is PlayableGame)
+        game = game.roll(PinCount(1)) as PlayableGame
         expectThat(game.currentPlayer).isEqualTo("Fred")
-        val game3: Game = game2.roll(PinCount(1))
-        assertTrue(game3 is CompletedGame)
+        game = game.roll(PinCount(1))
+        assertTrue(game is CompletedGame)
     }
 
     @Test
     fun `line`() {
-        val line = PlayableLine(
+        var line: Line
+        line = PlayableLine(
             PlayerName("Fred"),
             listOf(UnplayedFrame())
         )
-        val line2 = line.roll(PinCount(1))
-        assertTrue(line2 is PlayableLine)
-        val line3 = line2.roll(PinCount(1))
-        assertTrue(line3 is CompletedLine)
+        line = line.roll(PinCount(1)) as PlayableLine
+        line = line.roll(PinCount(1))
+        assertTrue(line is CompletedLine)
     }
 }

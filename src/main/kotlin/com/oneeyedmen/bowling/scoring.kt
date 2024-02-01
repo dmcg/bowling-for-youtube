@@ -5,15 +5,15 @@ fun Game.toScorecard(): String =
 
 private fun Line.toScorecard(): String =
     (listOf(playerName) + frames.map { it.toScorecard() })
-        .joinToString(" ")
+        .joinToString(" ") + "."
 
 private fun Frame.toScorecard() = when(this) {
-    is UnplayedFrame -> "[ ][ ] 000"
-    is InProgressFrame -> "[${roll1}][ ] 000"
+    is UnplayedFrame -> "[ ][ ]    "
+    is InProgressFrame -> "[${roll1}][ ]    "
     is NormalCompletedFrame -> toScorecard()
-    is Strike -> "[ ][X] 000"
+    is Strike -> "[ ][X]    "
 }
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
 private fun NormalCompletedFrame.toScorecard() =
-    "[${roll1}][${if (isSpare) "/" else roll2}] 000"
+    "[${roll1}][${if (isSpare) "/" else roll2}]    "

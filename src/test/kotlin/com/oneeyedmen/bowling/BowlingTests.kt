@@ -61,8 +61,8 @@ class BowlingTests {
         expectThat(Game().toScorecard()).isEqualTo("")
 
         expectThat(Game("Fred  ", "Barney", frameCount = 0).toScorecard()).isEqualTo("""
-            Fred  
-            Barney
+            Fred  .
+            Barney.
         """.trimIndent())
     }
 
@@ -70,38 +70,38 @@ class BowlingTests {
         var game: Game
         game = Game("Fred  ", "Barney", frameCount = 2) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [ ][ ] 000 [ ][ ] 000
-            Barney [ ][ ] 000 [ ][ ] 000
+            Fred   [ ][ ]     [ ][ ]    .
+            Barney [ ][ ]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(1)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][ ] 000 [ ][ ] 000
-            Barney [ ][ ] 000 [ ][ ] 000
+            Fred   [1][ ]     [ ][ ]    .
+            Barney [ ][ ]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(2)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2] 000 [ ][ ] 000
-            Barney [ ][ ] 000 [ ][ ] 000
+            Fred   [1][2]     [ ][ ]    .
+            Barney [ ][ ]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(10)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2] 000 [ ][ ] 000
-            Barney [ ][X] 000 [ ][ ] 000
+            Fred   [1][2]     [ ][ ]    .
+            Barney [ ][X]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(9)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2] 000 [9][ ] 000
-            Barney [ ][X] 000 [ ][ ] 000
+            Fred   [1][2]     [9][ ]    .
+            Barney [ ][X]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(1)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2] 000 [9][/] 000
-            Barney [ ][X] 000 [ ][ ] 000
+            Fred   [1][2]     [9][/]    .
+            Barney [ ][X]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(0)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2] 000 [9][/] 000
-            Barney [ ][X] 000 [-][ ] 000
+            Fred   [1][2]     [9][/]    .
+            Barney [ ][X]     [-][ ]    .
         """.trimIndent())
     }
 }

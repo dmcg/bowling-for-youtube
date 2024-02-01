@@ -138,6 +138,9 @@ value class Score(val value: Int) {
     override fun toString() = value.toString()
     operator fun plus(other: Score)
         = Score(value + other.value)
+
+    operator fun plus(pinCount: PinCount)
+        = Score(value + pinCount.value)
 }
 
 @JvmInline

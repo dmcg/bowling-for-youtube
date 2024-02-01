@@ -75,33 +75,38 @@ class BowlingTests {
         """.trimIndent())
         game = game.roll(PinCount(1)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][ ]     [ ][ ]    .
+            Fred   [1][ ] 001 [ ][ ]    .
             Barney [ ][ ]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(2)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2]     [ ][ ]    .
+            Fred   [1][2] 003 [ ][ ]    .
             Barney [ ][ ]     [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(10)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2]     [ ][ ]    .
-            Barney [ ][X]     [ ][ ]    .
+            Fred   [1][2] 003 [ ][ ]    .
+            Barney [ ][X] 010 [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(9)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2]     [9][ ]    .
-            Barney [ ][X]     [ ][ ]    .
+            Fred   [1][2] 003 [9][ ] 012.
+            Barney [ ][X] 010 [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(1)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2]     [9][/]    .
-            Barney [ ][X]     [ ][ ]    .
+            Fred   [1][2] 003 [9][/] 013.
+            Barney [ ][X] 010 [ ][ ]    .
         """.trimIndent())
         game = game.roll(PinCount(0)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred   [1][2]     [9][/]    .
-            Barney [ ][X]     [-][ ]    .
+            Fred   [1][2] 003 [9][/] 013.
+            Barney [ ][X] 010 [-][ ] 010.
+        """.trimIndent())
+        game = game.roll(PinCount(0)) as CompletedGame
+        expectThat(game.toScorecard()).isEqualTo("""
+            Fred   [1][2] 003 [9][/] 013.
+            Barney [ ][X] 010 [-][-] 010.
         """.trimIndent())
     }
 }

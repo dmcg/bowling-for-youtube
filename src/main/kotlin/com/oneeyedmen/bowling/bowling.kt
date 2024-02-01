@@ -91,9 +91,8 @@ class CompletedLine(
 ) : Line
 
 sealed interface Frame {
-    val score: Score?
-        get() = TODO("Not yet implemented")}
-
+    val totalPinCount: Score
+}
 
 sealed interface PlayableFrame : Frame {
     fun roll(pinCount: PinCount): Frame
@@ -106,14 +105,21 @@ class UnplayedFrame : PlayableFrame {
         pinCount.value == 10 -> Strike()
         else -> InProgressFrame(pinCount)
     }
+
+    override val totalPinCount: Score
+        get() = Score(0)
 }
 
 class InProgressFrame(val roll1: PinCount) : PlayableFrame {
     override fun roll(pinCount: PinCount) = NormalCompletedFrame(roll1, pinCount)
+    override val totalPinCount: Score
+        get() = Score(roll1.value)
 }
 
 class Strike : CompletedFrame {
     val roll1: PinCount = PinCount(10)
+    override val totalPinCount: Score
+        get() = Score(10)
 }
 
 class NormalCompletedFrame(
@@ -121,11 +127,17 @@ class NormalCompletedFrame(
     val roll2: PinCount
 ) : CompletedFrame {
     val isSpare: Boolean get() = roll1.value + roll2.value == 10
+    override val totalPinCount: Score
+        get() = roll1 + roll2
 }
 
 @JvmInline
 value class Score(val value: Int) {
     init { require(value in 0..300) }
+
+    override fun toString() = value.toString()
+    operator fun plus(other: Score)
+        = Score(value + other.value)
 }
 
 @JvmInline
@@ -136,6 +148,9 @@ value class PinCount(val value: Int) {
         0 -> "-"
         else -> value.toString()
     }
+
+    operator fun plus(that: PinCount)
+        = Score(value + that.value)
 }
 
 private fun <E> List<E>.replacing(item: E, newItem: E): List<E> =

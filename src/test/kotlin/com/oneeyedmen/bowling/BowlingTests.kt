@@ -60,67 +60,49 @@ class BowlingTests {
     fun `render pathological scorecards`() {
         expectThat(Game().toScorecard()).isEqualTo("")
 
-        expectThat(Game("Fred", "Barney", frameCount = 0).toScorecard()).isEqualTo(
-            """
-            Fred
+        expectThat(Game("Fred  ", "Barney", frameCount = 0).toScorecard()).isEqualTo("""
+            Fred  
             Barney
-        """.trimIndent()
-        )
+        """.trimIndent())
     }
 
     @Test fun `render scorecard`() {
         var game: Game
-        game = Game("Fred", "Barney", frameCount = 2) as PlayableGame
+        game = Game("Fred  ", "Barney", frameCount = 2) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred [ ][ ] 000 [ ][ ] 000
+            Fred   [ ][ ] 000 [ ][ ] 000
             Barney [ ][ ] 000 [ ][ ] 000
         """.trimIndent())
         game = game.roll(PinCount(1)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred [1][ ] 000 [ ][ ] 000
+            Fred   [1][ ] 000 [ ][ ] 000
             Barney [ ][ ] 000 [ ][ ] 000
         """.trimIndent())
         game = game.roll(PinCount(2)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred [1][2] 000 [ ][ ] 000
+            Fred   [1][2] 000 [ ][ ] 000
             Barney [ ][ ] 000 [ ][ ] 000
         """.trimIndent())
         game = game.roll(PinCount(10)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred [1][2] 000 [ ][ ] 000
+            Fred   [1][2] 000 [ ][ ] 000
             Barney [ ][X] 000 [ ][ ] 000
         """.trimIndent())
         game = game.roll(PinCount(9)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred [1][2] 000 [9][ ] 000
+            Fred   [1][2] 000 [9][ ] 000
             Barney [ ][X] 000 [ ][ ] 000
         """.trimIndent())
         game = game.roll(PinCount(1)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred [1][2] 000 [9][/] 000
+            Fred   [1][2] 000 [9][/] 000
             Barney [ ][X] 000 [ ][ ] 000
         """.trimIndent())
         game = game.roll(PinCount(0)) as PlayableGame
         expectThat(game.toScorecard()).isEqualTo("""
-            Fred [1][2] 000 [9][/] 000
+            Fred   [1][2] 000 [9][/] 000
             Barney [ ][X] 000 [-][ ] 000
         """.trimIndent())
-
     }
 }
 
-private fun Game.toScorecard(): String {
-    return this.lines.joinToString("\n") { line -> line.toScorecard() }
-}
-
-private fun Line.toScorecard() = (listOf(playerName) + frames.map { it.toScorecard() }).joinToString(" ")
-
-private fun Frame.toScorecard() = when(this) {
-    is UnplayedFrame -> "[ ][ ] 000"
-    is InProgressFrame -> "[${roll1}][ ] 000"
-    is NormalCompletedFrame -> toScorecard()
-    is Strike -> "[ ][X] 000"
-}
-
-@Suppress("IMPLICIT_CAST_TO_ANY")
-private fun NormalCompletedFrame.toScorecard() = "[${roll1}][${if (isSpare) "/" else roll2}] 000"

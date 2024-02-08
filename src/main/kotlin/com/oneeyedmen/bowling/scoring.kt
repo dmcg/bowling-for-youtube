@@ -7,16 +7,16 @@ private fun Line.toScorecard(): String =
     (listOf(playerName) + frames.toScorecard())
         .joinToString(" ")
 
-private fun List<Frame<*>>.toScorecard(): List<String> {
+private fun List<Frame>.toScorecard(): List<String> {
     var score = Score(0)
     return mapIndexed { index, frame ->
-        score = Score(score.value + frame.totalPinCount.value)
+        score += frame.totalPinCount
         if (frame is Strike) {
-            score = Score(score.value + this[index + 1].totalPinCount.value)
+            score += this[index + 1].totalPinCount
         } else if (frame is NormalCompletedFrame && frame.isSpare) {
             val nextRoll = this.getOrNull(index + 1)?.roll1
             if (nextRoll != null)
-                score = Score(score.value + nextRoll.value)
+                score += nextRoll
         }
         val scoreString = if (frame is UnplayedFrame) "   "
             else score.toString().padStart(3, '0')
@@ -24,7 +24,7 @@ private fun List<Frame<*>>.toScorecard(): List<String> {
     }
 }
 
-private fun Frame<*>.toScorecard() = when(this) {
+private fun Frame.toScorecard() = when(this) {
     is UnplayedFrame -> "[ ][ ]"
     is InProgressFrame -> "[${roll1}][ ]"
     is NormalCompletedFrame -> toScorecard()
@@ -35,7 +35,15 @@ private fun Frame<*>.toScorecard() = when(this) {
 private fun NormalCompletedFrame.toScorecard() =
     "[${roll1}][${if (isSpare) "/" else roll2}]"
 
-private val Frame<*>.roll1: PinCount?
+private val Frame.totalPinCount: Int
+    get() = when (this) {
+        is NormalCompletedFrame -> this.totalPinCount
+        is Strike -> this.totalPinCount
+        is InProgressFrame -> this.totalPinCount
+        is UnplayedFrame -> this.totalPinCount
+    }.value
+
+private val Frame.roll1: PinCount?
     get() = when (this) {
         is NormalCompletedFrame -> this.roll1
         is Strike -> this.roll1

@@ -2,6 +2,7 @@ package com.oneeyedmen.bowling
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.api.expectThrows
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import kotlin.test.assertTrue
@@ -38,11 +39,31 @@ class BowlingTests {
         game = game.roll(PinCount(4)) as PlayableGame
         expectThat(game.currentPlayer).isEqualTo("Fred")
         game = game.roll(PinCount(5)) as PlayableGame
-        game = game.roll(PinCount(6)) as PlayableGame
+        game = game.roll(PinCount(4)) as PlayableGame
         expectThat(game.currentPlayer).isEqualTo("Barney")
-        game = game.roll(PinCount(7)) as PlayableGame
-        game = game.roll(PinCount(8))
+        game = game.roll(PinCount(3)) as PlayableGame
+        game = game.roll(PinCount(2))
         assertTrue(game is CompletedGame)
+    }
+
+    @Test
+    fun `can't create invalid PinCounts`() {
+        expectThrows<IllegalArgumentException> {
+            PinCount(11)
+        }
+        expectThrows<IllegalArgumentException> {
+            PinCount(-1)
+        }
+    }
+
+    @Test
+    fun `can't roll invalid PinCounts`() {
+        var game: Game
+        game = Game("Fred", frameCount = 1) as PlayableGame
+        game = game.roll(PinCount(9)) as PlayableGame
+        expectThrows<IllegalArgumentException> {
+            game.roll(PinCount(2))
+        }
     }
 
     @Test

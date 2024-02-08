@@ -63,21 +63,21 @@ data class CompletedGame(
 
 sealed interface Line {
     val playerName: String
-    val frames: List<Frame>
+    val frames: List<Frame<*>>
 }
 class PlayableLine(
     override val playerName: String,
-    override val frames: List<Frame>
+    override val frames: List<Frame<*>>
 ) : Line {
     init {
         require(frames.isNotEmpty())
         require(frames.any { it is PlayableFrame })
     }
     fun roll(pinCount: PinCount): Line {
-        val currentFrame: PlayableFrame = frames.find { it is PlayableFrame } as PlayableFrame
-        val newFrame: Frame = currentFrame.roll(pinCount)
-        val newFrames: List<Frame> = frames.replacing(currentFrame, newFrame)
-        val completedFrames = newFrames.filterIsInstance<CompletedFrame>()
+        val currentFrame: PlayableFrame<*> = frames.find { it is PlayableFrame } as PlayableFrame
+        val newFrame: Frame<*> = currentFrame.roll(pinCount)
+        val newFrames: List<Frame<*>> = frames.replacing(currentFrame, newFrame)
+        val completedFrames = newFrames.filterIsInstance<CompletedFrame<*>>()
         return if (completedFrames.size == frames.size)
             CompletedLine(playerName, completedFrames)
         else
@@ -87,48 +87,47 @@ class PlayableLine(
 
 class CompletedLine(
     override val playerName: String,
-    override val frames: List<CompletedFrame>
+    override val frames: List<CompletedFrame<*>>
 ) : Line
 
-sealed interface Frame {
-    val totalPinCount: Score
+sealed class Frame<T : NumberOfPins>(
+    val totalPinCount: T
+)
+
+sealed class PlayableFrame<T : NumberOfPins>(
+    totalPinCount: T
+) : Frame<T>(totalPinCount) {
+    abstract fun roll(pinCount: PinCount): Frame<T>
 }
 
-sealed interface PlayableFrame : Frame {
-    fun roll(pinCount: PinCount): Frame
-}
+sealed class CompletedFrame<T : NumberOfPins>(
+    totalPinCount: T
+) : Frame<T>(totalPinCount)
 
-sealed interface CompletedFrame : Frame
-
-class UnplayedFrame : PlayableFrame {
+class UnplayedFrame : PlayableFrame<PinCount>(PinCount(0)) {
     override fun roll(pinCount: PinCount) = when {
         pinCount.value == 10 -> Strike()
         else -> InProgressFrame(pinCount)
     }
-
-    override val totalPinCount: Score
-        get() = Score(0)
 }
 
-class InProgressFrame(val roll1: PinCount) : PlayableFrame {
+class InProgressFrame(
+    val roll1: PinCount
+) : PlayableFrame<PinCount>(roll1) {
     override fun roll(pinCount: PinCount) = NormalCompletedFrame(roll1, pinCount)
-    override val totalPinCount: Score
-        get() = Score(roll1.value)
 }
 
-class Strike : CompletedFrame {
+class Strike : CompletedFrame<PinCount>(PinCount(10)) {
     val roll1: PinCount = PinCount(10)
-    override val totalPinCount: Score
-        get() = Score(10)
 }
 
 class NormalCompletedFrame(
     val roll1: PinCount,
     val roll2: PinCount
-) : CompletedFrame {
+) : CompletedFrame<PinCount>(
+    PinCount(roll1.value + roll2.value)
+) {
     val isSpare: Boolean get() = roll1.value + roll2.value == 10
-    override val totalPinCount: Score
-        get() = roll1 + roll2
 }
 
 @JvmInline
@@ -143,9 +142,38 @@ value class Score(val value: Int) {
         = Score(value + pinCount.value)
 }
 
+interface NumberOfPins {
+    val value: Int
+}
+
 @JvmInline
-value class PinCount(val value: Int) {
-    init { require(value in 0..10) }
+value class PinCount(
+    override val value: Int
+) : NumberOfPins {
+    init {
+        require(value in 0..10) {
+            "Invalid pin count $value"
+        }
+    }
+
+    override fun toString(): String = when (value) {
+        0 -> "-"
+        else -> value.toString()
+    }
+
+    operator fun plus(that: PinCount)
+        = Score(value + that.value)
+}
+
+@JvmInline
+value class FinalFramePinCount(
+    override val value: Int
+) : NumberOfPins {
+    init {
+        require(value in 0..30) {
+            "Invalid pin count $value"
+        }
+    }
 
     override fun toString(): String = when (value) {
         0 -> "-"

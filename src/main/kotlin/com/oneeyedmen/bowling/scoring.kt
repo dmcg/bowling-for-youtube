@@ -1,11 +1,11 @@
 package com.oneeyedmen.bowling
 
-fun Game.toScorecard(): String =
-    lines.joinToString("\n") { line -> line.toScorecard() }
+fun Game.toScorecard(): List<String> =
+    lines.map { line -> line.toScorecard() }
 
 private fun Line.toScorecard(): String =
     (listOf(playerName) + frames.toScorecard())
-        .joinToString(" ") + "."
+        .joinToString(" ")
 
 private fun List<Frame>.toScorecard(): List<String> {
     var score = Score(0)

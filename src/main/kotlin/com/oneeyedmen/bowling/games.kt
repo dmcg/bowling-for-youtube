@@ -31,7 +31,11 @@ data class PlayableGame(
             playerNames.map {
                 PlayableLine(
                     it,
-                    List(frameCount) { UnplayedFrame() }
+                    List(frameCount) { index ->
+                        if (index == frameCount -1 )
+                            UnplayedFinalFrame()
+                        else UnplayedFrame()
+                    }
                 )
             }
         }

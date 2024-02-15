@@ -21,6 +21,7 @@ value class PinCount(val value: Int) {
 
     override fun toString(): String = when (value) {
         0 -> "-"
+        10 -> "X"
         else -> value.toString()
     }
 

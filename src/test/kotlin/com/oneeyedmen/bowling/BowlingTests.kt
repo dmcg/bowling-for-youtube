@@ -59,7 +59,7 @@ class BowlingTests {
     @Test
     fun `can't roll invalid PinCounts`() {
         var game: Game
-        game = Game("Fred", frameCount = 1) as PlayableGame
+        game = Game("Fred", frameCount = 2) as PlayableGame
         game = game.roll(PinCount(9)) as PlayableGame
         expectThrows<IllegalArgumentException> {
             game.roll(PinCount(2))
@@ -204,6 +204,39 @@ class BowlingTests {
         game = game.roll(PinCount(5)) as CompletedGame
         game.expectScoreboard(
             "Fred   [9][/] 012 [2][/][5] 027"
+        )
+    }
+
+    @Test
+    fun `run of strikes`() {
+        var game: Game
+        game = Game("Fred  ", frameCount = 4) as PlayableGame
+        game.expectScoreboard(
+            "Fred   [ ][ ]     [ ][ ]     [ ][ ]     [ ][ ][ ]    "
+        )
+        game = game.roll(PinCount(10)) as PlayableGame
+        game.expectScoreboard(
+            "Fred   [ ][X] 010 [ ][ ]     [ ][ ]     [ ][ ][ ]    "
+        )
+        game = game.roll(PinCount(10)) as PlayableGame
+        game.expectScoreboard(
+            "Fred   [ ][X] 020 [ ][X] 030 [ ][ ]     [ ][ ][ ]    "
+        )
+        game = game.roll(PinCount(10)) as PlayableGame
+        game.expectScoreboard(
+            "Fred   [ ][X] 030 [ ][X] 050 [ ][X] 060 [ ][ ][ ]    "
+        )
+        game = game.roll(PinCount(10)) as PlayableGame
+        game.expectScoreboard(
+            "Fred   [ ][X] 030 [ ][X] 060 [ ][X] 080 [X][ ][ ] 090"
+        )
+        game = game.roll(PinCount(10)) as PlayableGame
+        game.expectScoreboard(
+            "Fred   [ ][X] 030 [ ][X] 060 [ ][X] 090 [X][X][ ] 110"
+        )
+        game = game.roll(PinCount(10)) as CompletedGame
+        game.expectScoreboard(
+            "Fred   [ ][X] 030 [ ][X] 060 [ ][X] 090 [X][X][X] 120"
         )
     }
 }

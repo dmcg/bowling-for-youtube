@@ -13,7 +13,15 @@ private fun List<Frame>.toScorecard(): List<String> {
         score += frame.totalPinCount
         when {
             frame is Strike -> {
-                score += this[index + 1].totalPinCount
+                val nextFrame = this[index + 1]
+                val nextRoll = nextFrame.roll1
+                if (nextRoll != null) {
+                    score += nextRoll
+                    val nextNextRoll = nextFrame.roll2
+                        ?: getOrNull(index + 2)?.roll1
+                    if (nextNextRoll != null)
+                        score += nextNextRoll
+                }
             }
             frame is NormalCompletedFrame && frame.isSpare -> {
                 val nextRoll = this.getOrNull(index + 1)?.roll1
@@ -37,9 +45,10 @@ private fun Frame.toScorecard() = when(this) {
     is NormalCompletedFrame -> toScorecard()
     is NormalCompletedFinalFrame -> toScorecard()
     is Strike -> "[ ][X]"
-    is BonusInProgressFinalFrame -> "[${roll1}][/][ ]"
+    is BonusInProgressFinalFrame -> toScorecard()
     is BonusCompletedFinalFrame -> toScorecard()
 }
+
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
 private fun NormalCompletedFrame.toScorecard() =
@@ -52,6 +61,10 @@ private fun NormalCompletedFinalFrame.toScorecard() =
 @Suppress("IMPLICIT_CAST_TO_ANY")
 private fun BonusCompletedFinalFrame.toScorecard() =
     "[${roll1}][${if (isSpare) "/" else roll2}][$roll3]"
+
+@Suppress("IMPLICIT_CAST_TO_ANY")
+private fun BonusInProgressFinalFrame.toScorecard() =
+    "[${roll1}][${if (isSpare) "/" else roll2}][ ]"
 
 private val Frame.totalPinCount: Int
     get() = when (this) {
@@ -77,4 +90,17 @@ private val Frame.roll1: PinCount?
         is UnplayedFinalFrame -> null
         is BonusInProgressFinalFrame -> this.roll1
         is BonusCompletedFinalFrame -> this.roll1
+    }
+
+private val Frame.roll2: PinCount?
+    get() = when (this){
+        is NormalCompletedFrame -> this.roll2
+        is NormalCompletedFinalFrame -> this.roll2
+        is Strike -> null
+        is InProgressFrame -> null
+        is InProgressFinalFrame -> null
+        is UnplayedFrame -> null
+        is UnplayedFinalFrame -> null
+        is BonusInProgressFinalFrame -> this.roll2
+        is BonusCompletedFinalFrame -> this.roll2
     }

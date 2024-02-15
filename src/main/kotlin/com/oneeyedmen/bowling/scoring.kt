@@ -20,9 +20,6 @@ private fun List<Frame>.toScorecard(): List<String> {
                 if (nextRoll != null)
                     score += nextRoll
             }
-            frame is BonusCompletedFinalFrame && frame.isSpare -> {
-                score += frame.roll3
-            }
         }
         val scoreString = when (frame) {
             is UnplayedFrame, is UnplayedFinalFrame -> "   "

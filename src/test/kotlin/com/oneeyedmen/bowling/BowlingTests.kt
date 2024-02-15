@@ -203,7 +203,7 @@ class BowlingTests {
         )
         game = game.roll(PinCount(5)) as CompletedGame
         game.expectScoreboard(
-            "Fred   [9][/] 012 [2][/][5] 032"
+            "Fred   [9][/] 012 [2][/][5] 027"
         )
     }
 }

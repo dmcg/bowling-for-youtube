@@ -78,29 +78,3 @@ private val Frame.totalPinCount: Int
         is BonusInProgressFinalFrame -> this.totalPinCount.value
         is BonusCompletedFinalFrame -> this.totalPinCount.value
     }
-
-private val Frame.roll1: PinCount?
-    get() = when (this) {
-        is NormalCompletedFrame -> this.roll1
-        is NormalCompletedFinalFrame -> this.roll1
-        is Strike -> this.roll1
-        is InProgressFrame -> this.roll1
-        is InProgressFinalFrame -> this.roll1
-        is UnplayedFrame -> null
-        is UnplayedFinalFrame -> null
-        is BonusInProgressFinalFrame -> this.roll1
-        is BonusCompletedFinalFrame -> this.roll1
-    }
-
-private val Frame.roll2: PinCount?
-    get() = when (this){
-        is NormalCompletedFrame -> this.roll2
-        is NormalCompletedFinalFrame -> this.roll2
-        is Strike -> null
-        is InProgressFrame -> null
-        is InProgressFinalFrame -> null
-        is UnplayedFrame -> null
-        is UnplayedFinalFrame -> null
-        is BonusInProgressFinalFrame -> this.roll2
-        is BonusCompletedFinalFrame -> this.roll2
-    }

@@ -23,6 +23,7 @@ private fun List<Frame>.toScorecard(): List<String> {
                         score += nextNextRoll
                 }
             }
+
             frame is NormalCompletedFrame && frame.isSpare -> {
                 val nextRoll = this.getOrNull(index + 1)?.roll1
                 if (nextRoll != null)
@@ -37,34 +38,22 @@ private fun List<Frame>.toScorecard(): List<String> {
     }
 }
 
-private fun Frame.toScorecard() = when(this) {
+private fun Frame.toScorecard() = when (this) {
     is UnplayedFrame -> "[ ][ ]"
     is UnplayedFinalFrame -> "[ ][ ][ ]"
     is InProgressFrame -> "[${roll1}][ ]"
     is InProgressFinalFrame -> "[${roll1}][ ][ ]"
-    is NormalCompletedFrame -> toScorecard()
-    is NormalCompletedFinalFrame -> toScorecard()
     is Strike -> "[ ][X]"
-    is BonusInProgressFinalFrame -> toScorecard()
-    is BonusCompletedFinalFrame -> toScorecard()
+    is NormalCompletedFrame -> "[$roll1][${roll2.slashIf(isSpare)}]"
+    is NormalCompletedFinalFrame -> "[$roll1][${roll2.slashIf(isSpare)}][ ]"
+    is BonusInProgressFinalFrame -> "[$roll1][${roll2.slashIf(isSpare)}][ ]"
+    is BonusCompletedFinalFrame -> "[$roll1][${roll2.slashIf(isSpare)}][$roll3]"
 }
 
-
-@Suppress("IMPLICIT_CAST_TO_ANY")
-private fun NormalCompletedFrame.toScorecard() =
-    "[${roll1}][${if (isSpare) "/" else roll2}]"
-
-@Suppress("IMPLICIT_CAST_TO_ANY")
-private fun NormalCompletedFinalFrame.toScorecard() =
-    "[${roll1}][${if (isSpare) "/" else roll2}][ ]"
-
-@Suppress("IMPLICIT_CAST_TO_ANY")
-private fun BonusCompletedFinalFrame.toScorecard() =
-    "[${roll1}][${if (isSpare) "/" else roll2}][$roll3]"
-
-@Suppress("IMPLICIT_CAST_TO_ANY")
-private fun BonusInProgressFinalFrame.toScorecard() =
-    "[${roll1}][${if (isSpare) "/" else roll2}][ ]"
+private fun PinCount.slashIf(isSpare: Boolean) = when {
+    isSpare -> "/"
+    else -> this.toString()
+}
 
 private val Frame.totalPinCount: Int
     get() = when (this) {

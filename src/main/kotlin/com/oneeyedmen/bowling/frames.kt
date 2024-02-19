@@ -3,6 +3,11 @@ package com.oneeyedmen.bowling
 sealed interface Frame {
     val roll1: PinCount? get() = null
     val roll2: PinCount? get() = null
+
+    fun bonusScoreFor(
+        nextFrame: Frame?,
+        nextNextFrame: Frame?
+    ) = Score(0)
 }
 
 sealed interface PlayableFrame : Frame {
@@ -32,6 +37,7 @@ class InProgressFrame(
 ) : PlayableFrame {
     override fun roll(pinCount: PinCount) =
         NormalCompletedFrame(roll1, pinCount)
+
     val totalPinCount = roll1
 }
 
@@ -42,6 +48,7 @@ class InProgressFinalFrame(
         (roll1 + pinCount).value >= 10 -> BonusInProgressFinalFrame(roll1, pinCount)
         else -> NormalCompletedFinalFrame(roll1, pinCount)
     }
+
     val totalPinCount = roll1
 }
 
@@ -51,6 +58,7 @@ class BonusInProgressFinalFrame(
 ) : PlayableFrame {
     override fun roll(pinCount: PinCount) =
         BonusCompletedFinalFrame(roll1, roll2, pinCount)
+
     val totalPinCount: Score = roll1 + roll2
     val isSpare: Boolean get() = totalPinCount.value == 10
 }
@@ -58,6 +66,19 @@ class BonusInProgressFinalFrame(
 class Strike : CompletedFrame {
     override val roll1: PinCount = PinCount(10)
     val totalPinCount = roll1
+
+    override fun bonusScoreFor(
+        nextFrame: Frame?,
+        nextNextFrame: Frame?
+    ): Score {
+        val nextRoll = nextFrame?.roll1
+        val nextNextRoll = nextFrame?.roll2 ?: nextNextFrame?.roll1
+        return when {
+            nextRoll != null && nextNextRoll != null -> nextRoll + nextNextRoll
+            nextRoll != null && nextNextRoll == null -> Score(nextRoll.value)
+            else -> Score(0)
+        }
+    }
 }
 
 class NormalCompletedFrame(
@@ -66,6 +87,14 @@ class NormalCompletedFrame(
 ) : CompletedFrame {
     val totalPinCount = roll1 plusAsPinCount roll2
     val isSpare: Boolean get() = totalPinCount.value == 10
+
+    override fun bonusScoreFor(
+        nextFrame: Frame?,
+        nextNextFrame: Frame?
+    ) = when {
+        isSpare -> Score(nextFrame?.roll1?.value ?: 0)
+        else -> Score(0)
+    }
 }
 
 class NormalCompletedFinalFrame(

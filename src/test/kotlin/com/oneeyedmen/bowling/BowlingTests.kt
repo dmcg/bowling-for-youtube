@@ -70,9 +70,30 @@ class BowlingTests {
     }
 
     @Test
-    fun `can't roll invalid PinCounts`() {
+    fun `can't roll invalid PinCounts in a non-final frame`() {
         var game: Game
         game = Game("Fred", frameCount = 2) as PlayableGame
+        game = game.roll(PinCount(9)) as PlayableGame
+        expectThrows<IllegalArgumentException> {
+            game.roll(PinCount(2))
+        }
+    }
+
+    @Test
+    fun `can't roll invalid PinCounts in a final frame`() {
+        var game: Game
+        game = Game("Fred", frameCount = 1) as PlayableGame
+        game = game.roll(PinCount(9)) as PlayableGame
+        expectThrows<IllegalArgumentException> {
+            game.roll(PinCount(2))
+        }
+    }
+
+    @Test
+    fun `can't roll invalid PinCounts in a strike final frame`() {
+        var game: Game
+        game = Game("Fred", frameCount = 1) as PlayableGame
+        game = game.roll(PinCount(10)) as PlayableGame
         game = game.roll(PinCount(9)) as PlayableGame
         expectThrows<IllegalArgumentException> {
             game.roll(PinCount(2))

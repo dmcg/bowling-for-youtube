@@ -56,6 +56,11 @@ class BonusInProgressFinalFrame(
     override val roll1: PinCount,
     override val roll2: PinCount
 ) : PlayableFrame {
+    init {
+        if (roll1.value != 10)
+            require(roll1.value + roll2.value <= 10)
+    }
+
     override fun roll(pinCount: PinCount) =
         BonusCompletedFinalFrame(roll1, roll2, pinCount)
 
@@ -110,6 +115,11 @@ class BonusCompletedFinalFrame(
     override val roll2: PinCount,
     val roll3: PinCount
 ) : CompletedFrame {
+    init {
+        if (roll1.value == 10 && roll2.value != 10)
+            require(roll2.value + roll3.value <= 10)
+    }
+
     val totalPinCount = roll1 + roll2 + roll3
     val isSpare: Boolean get() = (roll1 + roll2).value == 10
 }

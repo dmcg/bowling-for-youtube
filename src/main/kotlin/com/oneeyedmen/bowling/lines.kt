@@ -9,22 +9,19 @@ class PlayableLine(
     override val playerName: String,
     override val frames: List<Frame>
 ) : Line {
-
     constructor(playerName: String, frameCount: Int) :
         this(playerName,
-            List(frameCount) { index ->
-                if (index == frameCount -1 )
-                    UnplayedFinalFrame()
-                else UnplayedFrame()
-            })
+            List(frameCount - 1) { UnplayedFrame() } + UnplayedFinalFrame()
+        )
+
     init {
         require(frames.isNotEmpty())
         require(frames.any { it is PlayableFrame })
     }
 
     fun roll(pinCount: PinCount): Line {
-        val currentFrame: PlayableFrame = frames.find { it is PlayableFrame } as PlayableFrame
-        val newFrame: Frame = currentFrame.roll(pinCount)
+        val currentFrame = frames.find { it is PlayableFrame } as PlayableFrame
+        val newFrame = currentFrame.roll(pinCount)
         val newFrames: List<Frame> = frames.replacing(currentFrame, newFrame)
         val completedFrames = newFrames.filterIsInstance<CompletedFrame>()
         return if (completedFrames.size == frames.size)

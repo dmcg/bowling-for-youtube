@@ -273,6 +273,18 @@ class BowlingTests {
             "Fred   [ ][X] 030 [ ][X] 060 [ ][X] 090 [X][X][X] 120"
         )
     }
+
+    @Test
+    fun `maximum score is 300`() {
+        val rolls = List(12) { PinCount(10) }
+        val games: List<Game> = rolls.runningFold(Game("Fred")) { game, pinCount ->
+            (game as PlayableGame).roll(pinCount)
+        }
+//        games.forEach { println(it.toScorecard()) }
+        expectThat(
+            games.last().lines.first().frames.toScores().last()
+        ).isEqualTo(Score(300))
+    }
 }
 
 private fun Game.expectScoreboard(vararg lines: String) {

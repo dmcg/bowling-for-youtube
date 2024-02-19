@@ -20,6 +20,19 @@ class BowlingTests {
     }
 
     @Test
+    fun `can't create an invalid PlayableGame`() {
+        expectThrows<IllegalArgumentException> {
+            PlayableGame(frameCount = 1)
+        }
+        expectThrows<IllegalArgumentException> {
+            PlayableGame("Fred", frameCount = 0)
+        }
+        expectThrows<IllegalArgumentException> {
+            PlayableGame("Fred", frameCount = -1)
+        }
+    }
+
+    @Test
     fun `a game with players is playable`() {
         expectThat(Game("Fred")).isA<PlayableGame>()
         expectThat(Game("Fred", "Barney")).isA<PlayableGame>()

@@ -9,6 +9,14 @@ class PlayableLine(
     override val playerName: String,
     override val frames: List<Frame>
 ) : Line {
+
+    constructor(playerName: String, frameCount: Int) :
+        this(playerName,
+            List(frameCount) { index ->
+                if (index == frameCount -1 )
+                    UnplayedFinalFrame()
+                else UnplayedFrame()
+            })
     init {
         require(frames.isNotEmpty())
         require(frames.any { it is PlayableFrame })

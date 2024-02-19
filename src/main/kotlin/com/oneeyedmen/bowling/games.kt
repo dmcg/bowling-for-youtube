@@ -3,42 +3,29 @@ package com.oneeyedmen.bowling
 sealed interface Game {
     val lines: List<Line>
 
-    companion object {
-        operator fun invoke(
-            vararg playerNames: String,
-            frameCount: Int = 10
-        ): Game =
-            when {
-                playerNames.isEmpty() -> CompletedGame(emptyList())
-                frameCount == 0 -> CompletedGame(
-                    playerNames.map {
-                        CompletedLine(it, emptyList())
-                    }
-                )
-                else -> PlayableGame(*playerNames, frameCount = frameCount)
-            }
-    }
+    companion object
 }
 
-data class PlayableGame(
+operator fun Game.Companion.invoke(
+    vararg playerNames: String,
+    frameCount: Int = 10
+): Game =
+    when {
+        playerNames.isNotEmpty() && frameCount != 0 ->
+            PlayableGame(*playerNames, frameCount = frameCount)
+
+        else -> CompletedGame(
+            playerNames.map {
+                CompletedLine(it, emptyList())
+            }
+        )
+    }
+
+class PlayableGame(
     override val lines: List<Line>
 ) : Game {
     constructor(vararg playerNames: String, frameCount: Int) : this(
-        Unit.run {
-            require(frameCount >= 1) {
-                "Cannot construct a playable game with $frameCount frames"
-            }
-            playerNames.map {
-                PlayableLine(
-                    it,
-                    List(frameCount) { index ->
-                        if (index == frameCount -1 )
-                            UnplayedFinalFrame()
-                        else UnplayedFrame()
-                    }
-                )
-            }
-        }
+        playerNames.map { PlayableLine(it, frameCount) }
     )
 
     init {
@@ -75,6 +62,6 @@ data class PlayableGame(
         }
 }
 
-data class CompletedGame(
+class CompletedGame(
     override val lines: List<CompletedLine>
 ) : Game

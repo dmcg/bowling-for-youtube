@@ -18,7 +18,6 @@ value class PinCount(val value: Int) {
     init {
         require(value in 0..10)
     }
-
     override fun toString(): String = when (value) {
         0 -> "-"
         10 -> "X"
@@ -26,6 +25,7 @@ value class PinCount(val value: Int) {
     }
 
     operator fun plus(other: PinCount) = Score(value + other.value)
+    infix fun plusAsPinCount(other: PinCount): PinCount = PinCount(this.value + other.value)
 }
 
 internal fun <E> List<E>.replacing(item: E, newItem: E): List<E> =

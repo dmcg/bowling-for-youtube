@@ -52,7 +52,7 @@ class BonusInProgressFinalFrame(
     override fun roll(pinCount: PinCount) =
         BonusCompletedFinalFrame(roll1, roll2, pinCount)
     val totalPinCount: Score = roll1 + roll2
-    val isSpare: Boolean get() = roll1.value + roll2.value == 10
+    val isSpare: Boolean get() = totalPinCount.value == 10
 }
 
 class Strike : CompletedFrame {
@@ -64,16 +64,16 @@ class NormalCompletedFrame(
     override val roll1: PinCount,
     override val roll2: PinCount
 ) : CompletedFrame {
-    val isSpare: Boolean get() = roll1.value + roll2.value == 10
-    val totalPinCount = PinCount(roll1.value + roll2.value)
+    val totalPinCount = roll1 plusAsPinCount roll2
+    val isSpare: Boolean get() = totalPinCount.value == 10
 }
 
 class NormalCompletedFinalFrame(
     override val roll1: PinCount,
     override val roll2: PinCount
 ) : CompletedFrame {
-    val isSpare: Boolean get() = roll1.value + roll2.value == 10
-    val totalPinCount = PinCount(roll1.value + roll2.value)
+    val totalPinCount = roll1 plusAsPinCount roll2
+    val isSpare: Boolean get() = totalPinCount.value == 10
 }
 
 class BonusCompletedFinalFrame(
@@ -81,6 +81,6 @@ class BonusCompletedFinalFrame(
     override val roll2: PinCount,
     val roll3: PinCount
 ) : CompletedFrame {
-    val isSpare: Boolean get() = roll1.value + roll2.value == 10
-    val totalPinCount = Score(roll1.value + roll2.value + roll3.value)
+    val totalPinCount = roll1 + roll2 + roll3
+    val isSpare: Boolean get() = (roll1 + roll2).value == 10
 }

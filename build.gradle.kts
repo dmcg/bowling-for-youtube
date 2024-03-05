@@ -12,6 +12,7 @@ repositories {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("io.strikt:strikt-core:0.34.0")
+    testImplementation("net.jqwik:jqwik-kotlin:1.8.3")
 }
 
 tasks.test {

@@ -22,13 +22,13 @@ class BowlingTests {
     @Test
     fun `can't create an invalid PlayableGame`() {
         expectThrows<IllegalArgumentException> {
-            PlayableGame(frameCount = 1)
+            PlayableGame(emptyList(), frameCount = 1)
         }
         expectThrows<IllegalArgumentException> {
-            PlayableGame("Fred", frameCount = 0)
+            PlayableGame(listOf("Fred"), frameCount = 0)
         }
         expectThrows<IllegalArgumentException> {
-            PlayableGame("Fred", frameCount = -1)
+            PlayableGame(listOf("Fred"), frameCount = -1)
         }
     }
 

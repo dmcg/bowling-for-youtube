@@ -6,6 +6,9 @@ import net.jqwik.api.Property
 import net.jqwik.api.Provide
 import net.jqwik.api.constraints.NotEmpty
 import net.jqwik.kotlin.api.any
+import strikt.api.expectThat
+import strikt.assertions.isA
+import strikt.assertions.isEqualTo
 
 class BowlingPropertyTests {
 
@@ -33,6 +36,18 @@ class BowlingPropertyTests {
         @ForAll("validFrameCount") aNumberOfFrames: Int
     ) = Game(aListOfPlayerNames, aNumberOfFrames) is PlayableGame
 
+    @Property
+    fun `a completed line with no strikes or spares scores the total of the pincounts`(
+        @ForAll("smallPinCounts") pinCounts: List<PinCount>
+    ) {
+        val endGame = Game("Fred").rollAll(pinCounts)
+        val expectedScore = Score(pinCounts.sumOf { it.value })
+        expectThat(endGame) {
+            isA<CompletedGame>()
+            get {scores()}.isEqualTo(listOf(expectedScore))
+        }
+    }
+
     @Provide
     fun nonNegativeIntegers(): Arbitrary<Int> = Int.any(0..Int.MAX_VALUE)
 
@@ -41,6 +56,10 @@ class BowlingPropertyTests {
 
     @Provide
     fun validFrameCount(): Arbitrary<Int> = Int.any(1..10)
+
+    @Provide
+    fun smallPinCounts(): Arbitrary<List<PinCount>> = Int.any(0..4).map { PinCount(it) }.list().ofSize(20)
+
 }
 
 inline fun <reified X : Throwable> failsWith(f: () -> Unit) = try {
@@ -48,4 +67,12 @@ inline fun <reified X : Throwable> failsWith(f: () -> Unit) = try {
     false
 } catch (x: Throwable) {
     x is X
+}
+
+private fun Game.scores() = lines.map { it.frames.toScores().last() }
+
+private fun Game.rollAll(
+    pinCounts: List<PinCount>
+) = pinCounts.fold(this) { game, pinCount ->
+    (game as PlayableGame).roll(pinCount)
 }

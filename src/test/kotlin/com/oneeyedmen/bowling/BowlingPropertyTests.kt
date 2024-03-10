@@ -9,6 +9,7 @@ import net.jqwik.api.constraints.Size
 import net.jqwik.kotlin.api.any
 import net.jqwik.kotlin.api.combine
 import strikt.api.expectThat
+import strikt.api.expectThrows
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 
@@ -17,26 +18,34 @@ class BowlingPropertyTests {
     @Property
     fun `a game with no players isnt playable`(
         @ForAll("nonNegativeIntegers") aNumberOfFrames: Int
-    ) = Game(emptyList(), frameCount = aNumberOfFrames) is CompletedGame
+    ) {
+        expectThat(Game(emptyList(), frameCount = aNumberOfFrames)).isA<CompletedGame>()
+    }
 
     @Property
     fun `a game with no frames isnt playable`(
         @ForAll aListOfPlayerNames: List<String>
-    ) = Game(aListOfPlayerNames, frameCount = 0) is CompletedGame
+    ) {
+        expectThat(Game(aListOfPlayerNames, frameCount = 0)).isA<CompletedGame>()
+    }
 
     @Property
     fun `cannot create a game with negative frame count`(
         @ForAll aListOfPlayerNames: List<String>,
         @ForAll("negativeIntegers") aNumberOfFrames: Int
-    ) = failsWith<IllegalArgumentException> {
-        Game(aListOfPlayerNames, frameCount = aNumberOfFrames)
+    ) {
+        expectThrows<IllegalArgumentException> {
+            Game(aListOfPlayerNames, frameCount = aNumberOfFrames)
+        }
     }
 
     @Property
     fun `a game with players is playable`(
         @ForAll @NotEmpty aListOfPlayerNames: List<String>,
         @ForAll("validFrameCount") aNumberOfFrames: Int
-    ) = Game(aListOfPlayerNames, aNumberOfFrames) is PlayableGame
+    ) {
+        expectThat(Game(aListOfPlayerNames, aNumberOfFrames)).isA<PlayableGame>()
+    }
 
     @Property
     fun `a completed line with no strikes or spares scores the total of the pincounts`(
@@ -56,9 +65,7 @@ class BowlingPropertyTests {
         @ForAll("validFinalTurn") finalTurn: ValidFinalTurn
     ) {
         val endGame = Game("Fred").rollAll(turns + finalTurn)
-        expectThat(endGame) {
-            isA<CompletedGame>()
-        }
+        expectThat(endGame).isA<CompletedGame>()
     }
 
     @Property
@@ -131,13 +138,6 @@ data class ValidTurn(val roll1: PinCount, val roll2: PinCount?) : Turn {
 
 data class ValidFinalTurn(val roll1: PinCount, val roll2: PinCount?, val roll3: PinCount?) : Turn {
     override val rolls = listOfNotNull(roll1, roll2, roll3)
-}
-
-inline fun <reified X : Throwable> failsWith(f: () -> Unit) = try {
-    f()
-    false
-} catch (x: Throwable) {
-    x is X
 }
 
 private fun Game.scores() = lines.map { it.frames.toScores().last() }
